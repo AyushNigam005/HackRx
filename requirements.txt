@@ -1,3 +1,8 @@
-faiss-cpu
-sentence-transformers
+fastapi
+uvicorn
 PyMuPDF
+faiss-cpu
+numpy
+sentence-transformers
+openai
+pydantic
