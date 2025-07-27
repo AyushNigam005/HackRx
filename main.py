@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from typing import List
+from retrieval import get_context_for_questions  # ← Importing function from retrieval.py
 
 app = FastAPI()
 
@@ -21,13 +22,11 @@ class QueryRequest(BaseModel):
 class QueryResponse(BaseModel):
     answers: List[str]
 
-# --- Mock LLM Logic (until real GPT is plugged in) ---
-def mock_gpt(question: str, content: str) -> str:
-    return f"Mocked answer for: {question}"
-
 # --- API Endpoint ---
 @app.post("/api/v1/hackrx/run", response_model=QueryResponse, dependencies=[Depends(verify_token)])
 def run_query(payload: QueryRequest):
-    content = f"Fetched content from: {payload.documents}"  # Placeholder
-    answers = [mock_gpt(q, content) for q in payload.questions]
+    print("Running query for:", payload.questions)
+    answers = get_context_for_questions(payload.documents, payload.questions)
+    print("Answers generated:", answers)
     return {"answers": answers}
+
