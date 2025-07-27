@@ -5,30 +5,52 @@ from pydantic import BaseModel
 from typing import List
 from document_parser import extract_text_from_pdf, chunk_text
 from embed_store import create_faiss_index, search_faiss
-# from llm_reasoner import ask_gpt  # Uncomment if GPT working
+from llm_reasoner import ask_gpt  # 🧠 Mock or Real GPT answer
 
 app = FastAPI()
 
-# Request body schema
+# Request format (now multiple PDFs allowed)
 class QueryRequest(BaseModel):
-    documents: str  # Not used yet
+    documents: List[str]
     questions: List[str]
 
-@app.post("/api/v1/hackrx/run")
+# Response format
+class Answer(BaseModel):
+    document: str
+    question: str
+    answer: str
+
+class QueryResponse(BaseModel):
+    answers: List[Answer]
+
+@app.post("/api/v1/hackrx/run", response_model=QueryResponse)
 async def run_query(req: QueryRequest):
-    # Load and process PDF
-    pdf_path = "HDFHLIP23024V072223.pdf"
-    text = extract_text_from_pdf(pdf_path)
-    chunks = chunk_text(text)
-    index, _ = create_faiss_index(chunks)
+    final_answers = []
 
-    answers = []
-    for question in req.questions:
-        top_chunks = search_faiss(question, chunks, index)
-        evidence = "\n---\n".join(top_chunks) if top_chunks else "No matching clause found."
+    for doc_path in req.documents:
+        try:
+            text = extract_text_from_pdf(doc_path)
+            chunks = chunk_text(text)
+            index, _ = create_faiss_index(chunks)
 
-        # Mock answer (replace with GPT later)
-        mock_answer = f"(Mock Answer): {question}\nClause: {evidence[:300]}..."
-        answers.append(mock_answer)
+            for question in req.questions:
+                top_chunks = search_faiss(question, chunks, index)
+                evidence = "\n---\n".join(top_chunks) if top_chunks else "No matching clause found."
+                
+                gpt_answer = ask_gpt(question, evidence)
 
-    return {"answers": answers}
+                final_answers.append({
+                    "document": doc_path,
+                    "question": question,
+                    "answer": gpt_answer
+                })
+
+        except Exception as e:
+            for question in req.questions:
+                final_answers.append({
+                    "document": doc_path,
+                    "question": question,
+                    "answer": f"❌ Error while processing '{doc_path}': {str(e)}"
+                })
+
+    return {"answers": final_answers}
