@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from typing import List
 from document_parser import extract_text_from_pdf, chunk_text
 from embed_store import create_faiss_index, search_faiss
-from llm_reasoner import ask_gpt  # 🧠 Mock or Real GPT answer
+from llm_reasoner import ask_cohere  # 🧠 Mock or Real GPT answer
 
 app = FastAPI()
 
@@ -36,8 +36,9 @@ async def run_query(req: QueryRequest):
             for question in req.questions:
                 top_chunks = search_faiss(question, chunks, index)
                 evidence = "\n---\n".join(top_chunks) if top_chunks else "No matching clause found."
-                
-                gpt_answer = ask_gpt(question, evidence)
+
+                # 🧠 Ask Gemini
+                gpt_answer = ask_cohere(question, evidence)
 
                 final_answers.append({
                     "document": doc_path,
