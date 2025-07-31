@@ -45,7 +45,7 @@ if st.button("Get Answers 🚀"):
             }
 
             try:
-                res = requests.post("https://Ayush018--hackrx-ayush-backend.hf.space/api/v1/hackrx/run", json=payload)
+                res = requests.post("https://huggingface.co/spaces/Ayush018/hackrx-ayush-backend", json=payload)
                 if res.status_code == 200:
                     results = res.json()["answers"]
                     st.success("✅ Answers retrieved!")
