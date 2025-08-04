@@ -53,7 +53,9 @@ if st.button("Get Answers 🚀"):
                     }
 
                     # ✅ Backend URL
+                    # ✅ Backend URL
                     backend_url = "https://ayush018-hackrx-fastapi.hf.space/run"
+
 
                     # 🔄 Optional: Ping retry loop
                     for _ in range(10):

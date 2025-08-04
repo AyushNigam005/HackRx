@@ -1,21 +1,36 @@
 import cohere
+import time
 
-co = cohere.Client("TFinrBNShrjda6awNw1KdfjWc7raoq42QGRu7mQe")
+COHERE_API_KEY = "TFinrBNShrjda6awNw1KdfjWc7raoq42QGRu7mQe"
+co = cohere.Client(COHERE_API_KEY)
 
-def ask_cohere(question, context):
-    prompt = f"""You are a smart insurance assistant.
-Use the following clause to answer the user query clearly.
+def ask_cohere(question: str, context: str) -> str:
+    trimmed_context = context[:4000]
 
-Clause:
-\"\"\"{context}\"\"\"
+    prompt = f"""You are an expert assistant answering strictly from insurance policy documents.
 
-Query: {question}
-Give a YES or NO answer, and short explanation."""
+Only answer using information from the context. Do not guess or speculate.
+Do not say “yes”, “no”, “the answer is”, or mention missing information.
+Use one clear, complete sentence based only on the content below.
 
-    response = co.generate(
-        model="command",  # ✅ Use "command" instead of "command-r"
-        prompt=prompt,
-        max_tokens=150,
-        temperature=0.3
-    )
-    return response.generations[0].text.strip()
+Context:
+\"\"\"{trimmed_context}\"\"\"
+
+Question: {question}
+Answer:"""
+
+    for attempt in range(3):
+        try:
+            response = co.generate(
+                model="command-light",
+                prompt=prompt,
+                max_tokens=300,
+                temperature=0.3,
+                stop_sequences=["\n"]
+            )
+            return response.generations[0].text.strip()
+        except Exception as e:
+            print(f"[Attempt {attempt+1}] Cohere API error: {e}")
+            time.sleep(1)
+
+    return "❌ Cohere API error after 3 retries."
