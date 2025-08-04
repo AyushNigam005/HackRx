@@ -1,8 +1,7 @@
 import cohere
 import time
-import os
 
-COHERE_API_KEY = os.getenv("TFinrBNShrjda6awNw1KdfjWc7raoq42QGRu7mQe")
+COHERE_API_KEY = "TFinrBNShrjda6awNw1KdfjWc7raoq42QGRu7mQe"
 co = cohere.Client(COHERE_API_KEY)
 
 def ask_cohere(question: str, context: str) -> str:
