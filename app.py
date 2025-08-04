@@ -10,7 +10,7 @@ from llm_reasoner import ask_cohere  # if using Cohere
 
 app = FastAPI()
 
-API_KEY = "ee780205a54c3c1504fd981ed73efa751d8b9a453087a3f5a9b9d03c8e93ed83"
+API_KEY = os.getenv("ee780205a54c3c1504fd981ed73efa751d8b9a453087a3f5a9b9d03c8e93ed83")
 security = HTTPBearer()
 
 def verify_token(
